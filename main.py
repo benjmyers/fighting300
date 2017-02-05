@@ -1,6 +1,7 @@
 import os
 import re
 import difflib
+import shutil
 from operator import itemgetter
 
 def similar(seq1, seq2):
@@ -18,14 +19,14 @@ def getBranch(s):
     sa = artillery.search(s)
     sr = reserves.search(s)
     ss = sharpshooters.search(s)
-    if si:
+    if sr:
+        return ["Reserves", sr.start()]
+    elif si:
         return ["Infantry", si.start()]
     elif sc:
         return ["Cavalry", sc.start()]
     elif sa:
         return ["Artillery", sa.start()]
-    elif sr:
-        return ["Reserves", sr.start()]
     elif ss:
         return ["Sharpshooters", ss.start()]
     else:
@@ -119,7 +120,8 @@ def getRegiments():
             continue
 
         f = open(filepath + filename, 'r', errors='ignore')
-        contents = f.read().strip().split("\n")
+        body = f.read().strip()
+        contents = body.split("\n")
 
         if len(contents) > 2:
 
@@ -147,10 +149,24 @@ def getRegiments():
             # Using the start and end index from above to isolate the state, go get the state
             state = getState(clean[startIndex:endIndex])
 
-            print(clean, regNo[0], state, branch[0])
-            # print(" ")
+            print(regimentRaw, regNo[0], state, branch[0])
+            newName = str(regNo[0]) + "_" + state + "_" + branch[0]
+            notCorrect = input("Correct? ")
+            if notCorrect == 'o':
+                newName = filename
+            elif notCorrect != '':
+                newName = notCorrect.replace(" ", "_")
+
+            print(newName)
+            newFile = open("processed/" + newName + ".txt", 'w')
+            newFile.write(body)
+            newFile.close()
+            print(" ")
+
+            shutil.move('pages/txt/' + filename,'pages/txt/processed')
         else:
             print(filename)
+
 
 
 def main():
